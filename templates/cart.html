@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h3>Your Cart</h3>
+  {% if items %}
+    <table class="table">
+      <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td>{{ it.product.name }}</td>
+          <td>{{ it.qty }}</td>
+          <td>${{ '%.2f'|format(it.product.price) }}</td>
+          <td>${{ '%.2f'|format(it.subtotal) }}</td>
+          <td><a href="/cart/remove/{{ it.product.id }}" class="btn btn-sm btn-link">Remove</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="d-flex justify-content-between align-items-center">
+      <h4>Total: ${{ '%.2f'|format(total) }}</h4>
+      <form action="/checkout" method="post" class="d-flex gap-2">
+        <input name="customer" class="form-control" placeholder="Customer name" required>
+        <button class="btn btn-success">Checkout</button>
+      </form>
+    </div>
+  {% else %}
+    <p>Your cart is empty. <a href="/">Browse products</a></p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block hero %}
+  <div class="hero hero-home bg-white shadow-sm mb-4">
+    <div class="container-fluid px-4 px-lg-5 py-4 d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="display-6 fw-bold mb-1">Welcome to MyShop</h1>
+        <p class="text-muted mb-0">Simple billing with beautiful UI and PDF invoices</p>
+      </div>
+      <div>
+        <a href="/cart" class="btn btn-outline-primary btn-lg">View Cart <span class="badge bg-primary text-white">{{ cart_count or 0 }}</span></a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block content %}
+  <div class="row g-4">
+    <div class="col-lg-9">
+      <div class="screenshot-spacer"></div>
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for p in products %}
+        <div class="col">
+          <div class="card h-100 product-card shadow-sm">
+            {% if p.image_url %}
+              <img src="{{ p.image_url }}" class="card-img-top product-img" alt="{{ p.name }}">
+            {% else %}
+              <div class="placeholder-img">No Image</div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ p.name }}</h5>
+              <p class="card-text text-muted mb-2">{{ p.description if p.description else '' }}</p>
+              <div class="mt-auto d-flex justify-content-between align-items-center">
+                <div class="price">${{ '%.2f'|format(p.price) }}</div>
+                <form action="/cart/add/{{ p.id }}" method="post">
+                  <button class="btn btn-sm btn-primary">Add to cart</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card shadow-sm sticky-sidebar p-3">
+        <div class="card-body">
+          <h5 class="card-title">Cart</h5>
+          <p class="card-text">Items: <strong>{{ cart_count or 0 }}</strong></p>
+          <a href="/cart" class="btn btn-outline-primary w-100">View Cart</a>
+          <a href="/admin/products" class="btn btn-link mt-2">Admin - Products</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

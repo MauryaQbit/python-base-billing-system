@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h3>Invoices</h3>
+  {% if invoices %}
+    <table class="table">
+      <thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Created</th><th></th></tr></thead>
+      <tbody>
+        {% for inv in invoices %}
+          <tr>
+            <td>{{ inv.id }}</td>
+            <td>{{ inv.customer }}</td>
+            <td>${{ '%.2f'|format(inv.total) }}</td>
+            <td>{{ inv.created }}</td>
+            <td><a href="/invoice/{{ inv.id }}" class="btn btn-sm btn-primary">View</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No invoices yet.</p>
+  {% endif %}
+{% endblock %}

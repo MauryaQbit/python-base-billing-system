@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row gx-4 order-shell">
+  <div class="col-lg-9">
+    <div class="order-header d-flex align-items-start mb-3 gap-3">
+      <a class="btn btn-light btn-sm order-back" href="#"><i class="bi bi-arrow-left"></i></a>
+      <div class="order-title-block">
+        <h2 class="mb-1 order-title">Order #{{ invoice.id }} <span class="order-active">Active</span></h2>
+        <div class="text-muted order-meta">Ordered • Via Website • {{ items|length }} Product(s)</div>
+      </div>
+      <div class="ms-auto d-flex gap-2 order-actions">
+        <a href="/invoice/{{ invoice.id }}/pdf" class="btn btn-outline-secondary btn-sm"><i class="bi bi-cloud-arrow-down"></i> Export</a>
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-printer"></i> Print</button>
+        <button class="btn btn-dark btn-sm">Confirm Return</button>
+        <div class="dropdown">
+          <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">&nbsp;</button>
+          <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item">More</a></li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3 p-3 order-summary-card shadow-sm" id="order-summary">
+      <div class="d-flex gap-3">
+        <div class="avatar bg-secondary text-white d-flex align-items-center justify-content-center">{{ invoice.customer[:2] if invoice.customer }}</div>
+        <div class="w-100">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="mb-0">{{ invoice.customer }}</h5>
+              <div class="small text-muted">Individual</div>
+            </div>
+            <div class="text-end small text-muted">Order created • {{ invoice.created }}</div>
+          </div>
+
+                <div class="mt-3">
+            <div class="d-flex align-items-center gap-3">
+              <div style="flex:1">
+                <div class="timeline mb-2 d-flex gap-3 align-items-center">
+                  <div class="step done"><i class="bi bi-check-lg text-white"></i></div>
+                  <div class="line"></div>
+                  <div class="step active"><i class="bi bi-arrow-right-short text-white"></i></div>
+                  <div class="line"></div>
+                  <div class="step"><i class="bi bi-clock text-white"></i></div>
+                </div>
+                <div class="small text-muted mt-1">Picked up: 30 Oct, 9:00am</div>
+              </div>
+              <div class="text-end actions d-flex gap-2 flex-wrap justify-content-end">
+                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#attachments"><i class="bi bi-paperclip"></i> Attachments</button>
+                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#sendEmail"><i class="bi bi-envelope"></i> Send Email</button>
+              </div>
+            </div>
+
+            <div class="collapse mt-3" id="attachments">
+              <div class="card card-body panel-card">
+                <form method="post" action="/invoice/{{ invoice.id }}/attachments" enctype="multipart/form-data">
+                  <div class="input-group">
+                    <input type="file" name="file" class="form-control">
+                    <button class="btn btn-primary" type="submit">Upload</button>
+                  </div>
+                </form>
+                <div class="mt-3">
+                  <h6>Attachments</h6>
+                  {% if attachments %}
+                    <ul class="list-unstyled mb-0">
+                      {% for a in attachments %}
+                        <li><a href="/invoice/{{ invoice.id }}/attachment/{{ a.id }}">{{ a.filename }}</a> <small class="text-muted">{{ a.uploaded_at }}</small></li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <div class="text-muted small">No attachments</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="collapse mt-3" id="sendEmail">
+              <div class="card card-body panel-card">
+                <form method="post" action="/invoice/{{ invoice.id }}/send_email">
+                  <div class="mb-2"><input name="to" class="form-control" placeholder="Recipient email" required></div>
+                  <div class="mb-2"><input name="subject" class="form-control" placeholder="Subject"></div>
+                  <div class="mb-2"><textarea name="message" class="form-control" placeholder="Message"></textarea></div>
+                  <button class="btn btn-primary">Send Email</button>
+                </form>
+                <div class="small text-muted mt-2">Configure SMTP to send real email; otherwise it prints to the server console.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3 shadow-sm order-product-card" id="order-items">
+      <div class="card-body">
+        <h4 class="mb-3 section-title">Product Rent ({{ items|length }})</h4>
+        <div class="table-responsive order-table-wrap">
+          <table class="table align-middle order-table">
+            <thead>
+              <tr>
+                <th>Item Details</th>
+                <th>Quantity</th>
+                <th>Charge</th>
+                <th class="text-end">Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in items %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-3 item-cell">
+                    {% if it.image_url %}
+                      <img src="{{ it.image_url }}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;"/>
+                    {% else %}
+                      <div class="placeholder-img item-thumb"><i class="bi bi-box-seam"></i></div>
+                    {% endif %}
+                    <div>
+                      <div class="fw-bold">{{ it.name }}</div>
+                      <div class="small text-muted">SKU: -</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ it.quantity }}x</td>
+                <td>2 day(s) • ${{ '%.2f'|format(it.price) }}/day</td>
+                <td class="text-end fw-bold">${{ '%.2f'|format(it.quantity * it.price) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="card mb-3 sticky-sidebar p-3 payments-card shadow-sm" id="payments-panel">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="payments-title">Payments</div>
+        <div class="notes-tab">Notes</div>
+      </div>
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="small text-muted text-uppercase payment-status-label">Status</div>
+          <span class="badge rounded-pill payment-pill {{ 'bg-success-subtle text-success' if paid >= invoice.total else 'bg-info-subtle text-info' if paid else 'bg-secondary-subtle text-secondary' }}">{{ 'Partially paid' if paid and paid < invoice.total else 'Paid' if paid >= invoice.total else 'Unpaid' }}</span>
+        </div>
+      </div>
+      <hr>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between"><div>Invoice</div><div>${{ '%.2f'|format(invoice.total) }}</div></div>
+        <div class="d-flex justify-content-between"><div>Paid</div><div>${{ '%.2f'|format(paid) }}</div></div>
+        <div class="d-flex justify-content-between"><div>Outstanding</div><div>${{ '%.2f'|format(outstanding) }}</div></div>
+      </div>
+      <div class="d-grid">
+        <button class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#payForm">Record Payment</button>
+      </div>
+
+      <div class="collapse mt-3" id="payForm">
+        <form method="post" action="/invoice/{{ invoice.id }}/payments">
+          <div class="mb-2"><input name="amount" class="form-control" placeholder="Amount" required></div>
+          <div class="mb-2"><input name="method" class="form-control" placeholder="Method"></div>
+          <div class="mb-2"><input name="note" class="form-control" placeholder="Note (optional)"></div>
+          <button class="btn btn-primary w-100">Save Payment</button>
+        </form>
+      </div>
+
+      <hr>
+      <div class="d-flex align-items-center justify-content-between">
+        <h6 class="mb-0">Payment Receive</h6>
+        <span class="badge rounded-pill bg-light text-secondary">{{ payments|length }}</span>
+      </div>
+      <div class="small text-muted mb-2">Recent</div>
+      {% if payments %}
+        {% for p in payments %}
+          <div class="card p-2 mb-2 payment-card">
+            <div class="d-flex justify-content-between"><div>Payment #{{ p.id }}</div><div class="text-success">+${{ '%.2f'|format(p.amount) }}</div></div>
+            <div class="small text-muted">{{ p.method }} • {{ p.created }}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="text-muted small">No payments yet</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

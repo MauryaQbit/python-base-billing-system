@@ -216,6 +216,9 @@ body { background: #f1f5f9; font-family: Inter, system-ui, -apple-system, Segoe 
 	.sticky-sidebar { position: static; }
 	.detail-img { height: 320px; }
 	.order-title { font-size: 1.5rem; }
+	.payments-card { min-height: auto; }
+	.table > :not(caption) > * > * { padding: .7rem .6rem; }
+	.table thead th, .table tbody td { font-size: .9rem; }
 }
 
 @media (max-width: 767.98px) {
@@ -232,17 +235,20 @@ body { background: #f1f5f9; font-family: Inter, system-ui, -apple-system, Segoe 
 	.order-header { flex-wrap: wrap; }
 	.order-actions { width: 100%; }
 	.order-actions .btn { flex: 1; min-width: 0; }
+	.order-actions .dropdown { flex: 1; }
+	.order-actions .dropdown .btn { width: 100%; }
 	.timeline .step { width: 28px; height: 28px; }
-	.payments-card { min-height: auto; }
 	.cart-thumb { width: 44px; height: 44px; }
-	table thead th, table tbody td { padding: .6rem .5rem; font-size: .9rem; white-space: nowrap; }
 	.table > :not(caption) > * > * { padding: .6rem .5rem; }
+	.table thead th, .table tbody td { font-size: .88rem; }
+	.table td .fw-bold, .table td .small { white-space: normal; }
 	.card-body { padding: 1rem; }
-}
 
-@media (max-width: 991.98px) {
-	.table > :not(caption) > * > * { padding: .7rem .6rem; }
-	.table thead th, .table tbody td { font-size: .9rem; }
+	/* comfortable touch targets */
+	.btn { min-height: 40px; }
+	.form-control, .form-select { min-height: 42px; }
+	.input-group > .form-control { min-width: 0; }
+	.input-group .btn { flex-shrink: 0; }
 }
 
 @media (max-width: 575.98px) {
@@ -261,4 +267,5 @@ body { background: #f1f5f9; font-family: Inter, system-ui, -apple-system, Segoe 
 @media (max-width: 400px) {
 	.product-img { height: 110px; }
 	.product-card .card-body .small.text-muted { display: none; }
+	.table thead th, .table tbody td { font-size: .82rem; }
 }

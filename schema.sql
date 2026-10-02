@@ -1,19 +1,29 @@
--- products, invoices, and invoice items
+-- Advanced billing system schema
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS invoices;
 DROP TABLE IF EXISTS invoice_items;
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS attachments;
 
 CREATE TABLE products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    category TEXT DEFAULT 'General',
     price REAL NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 50,
+    sku TEXT DEFAULT '',
     image_url TEXT
 );
 
 CREATE TABLE invoices (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer TEXT,
+    subtotal REAL DEFAULT 0,
+    discount REAL DEFAULT 0,
+    tax REAL DEFAULT 0,
     total REAL,
+    status TEXT DEFAULT 'Unpaid',
     created TEXT
 );
 

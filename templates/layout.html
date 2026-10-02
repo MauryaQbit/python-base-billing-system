@@ -12,12 +12,15 @@
     <header class="app-topbar">
       <div class="app-topbar-inner">
         <a class="app-brand" href="/"><i class="bi bi-lightning-charge-fill me-1"></i>MyShop</a>
-        <nav class="app-toplinks" aria-label="Primary">
+        <nav class="app-toplinks d-none d-lg-flex" aria-label="Primary">
           <a href="/"><i class="bi bi-grid me-1"></i>Shop</a>
           <a href="/cart"><i class="bi bi-cart3 me-1"></i>Cart <span class="top-pill">{{ cart_count or 0 }}</span></a>
           <a href="/invoices"><i class="bi bi-receipt me-1"></i>Invoices</a>
           <a href="/admin/products"><i class="bi bi-gear me-1"></i>Admin</a>
         </nav>
+        <button class="btn btn-light d-lg-none nav-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNav" aria-label="Open menu">
+          <i class="bi bi-list"></i>
+        </button>
       </div>
     </header>
     <aside class="app-sidebar" aria-hidden="false">
@@ -40,6 +43,27 @@
       {% block content %}{% endblock %}
       <footer class="text-center text-muted small mt-5 pb-3">MyShop Premium Billing • GST-ready • PDF • Payments • Stock</footer>
     </main>
+
+    <nav class="mobile-tabbar d-lg-none" aria-label="Mobile">
+      <a href="/" class="{{ 'active' if request.path == '/' or request.path.startswith('/product/') else '' }}"><i class="bi bi-grid-fill"></i><span>Shop</span></a>
+      <a href="/cart" class="{{ 'active' if request.path.startswith('/cart') else '' }}"><i class="bi bi-cart-fill"></i><span>Cart</span></a>
+      <a href="/invoices" class="{{ 'active' if request.path.startswith('/invoices') or request.path.startswith('/invoice/') else '' }}"><i class="bi bi-receipt"></i><span>Invoices</span></a>
+      <a href="/admin/products" class="{{ 'active' if request.path.startswith('/admin') else '' }}"><i class="bi bi-gear-fill"></i><span>Admin</span></a>
+    </nav>
+
+    <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="mobileNav" aria-labelledby="mobileNavLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="mobileNavLabel"><i class="bi bi-lightning-charge-fill text-primary me-1"></i>MyShop</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column">
+        <a href="/" class="mobile-nav-link {{ 'active' if request.path == '/' else '' }}"><i class="bi bi-grid"></i>Shop</a>
+        <a href="/cart" class="mobile-nav-link {{ 'active' if request.path.startswith('/cart') else '' }}"><i class="bi bi-cart3"></i>Cart <span class="top-pill">{{ cart_count or 0 }}</span></a>
+        <a href="/invoices" class="mobile-nav-link {{ 'active' if request.path.startswith('/invoices') or request.path.startswith('/invoice/') else '' }}"><i class="bi bi-receipt"></i>Invoices</a>
+        <a href="/admin/products" class="mobile-nav-link {{ 'active' if request.path.startswith('/admin') else '' }}"><i class="bi bi-gear"></i>Admin</a>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

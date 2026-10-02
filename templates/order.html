@@ -5,7 +5,7 @@
     <div class="order-header d-flex align-items-start mb-3 gap-3">
       <a class="btn btn-light btn-sm order-back" href="#"><i class="bi bi-arrow-left"></i></a>
       <div class="order-title-block">
-        <h2 class="mb-1 order-title">Order #{{ invoice.id }} <span class="order-active">Active</span></h2>
+        <h2 class="mb-1 order-title">Order #{{ invoice.id }} <span class="badge {{ 'bg-success' if status=='Paid' else 'bg-warning text-dark' if status=='Partially Paid' else 'bg-danger' }} ms-2" style="font-size:1rem">{{ status }}</span></h2>
         <div class="text-muted order-meta">Ordered • Via Website • {{ items|length }} Product(s)</div>
       </div>
       <div class="ms-auto d-flex gap-2 order-actions">
@@ -107,9 +107,9 @@
                 <td>
                   <div class="d-flex align-items-center gap-3 item-cell">
                     {% if it.image_url %}
-                      <img src="{{ it.image_url }}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;"/>
+                      <img src="{{ it.image_url }}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;" onerror="this.onerror=null;this.src='https://picsum.photos/seed/myshop{{ it.product_id }}/200/200'"/>
                     {% else %}
-                      <div class="placeholder-img item-thumb"><i class="bi bi-box-seam"></i></div>
+                      <img src="https://picsum.photos/seed/myshop{{ it.product_id }}/200/200" style="width:56px;height:56px;object-fit:cover;border-radius:6px;"/>
                     {% endif %}
                     <div>
                       <div class="fw-bold">{{ it.name }}</div>
@@ -138,12 +138,15 @@
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <div class="small text-muted text-uppercase payment-status-label">Status</div>
-          <span class="badge rounded-pill payment-pill {{ 'bg-success-subtle text-success' if paid >= invoice.total else 'bg-info-subtle text-info' if paid else 'bg-secondary-subtle text-secondary' }}">{{ 'Partially paid' if paid and paid < invoice.total else 'Paid' if paid >= invoice.total else 'Unpaid' }}</span>
+          <span class="badge rounded-pill payment-pill {{ 'bg-success-subtle text-success' if status=='Paid' else 'bg-warning-subtle text-warning' if status=='Partially Paid' else 'bg-danger-subtle text-danger' }}">{{ status }}</span>
         </div>
       </div>
       <hr>
       <div class="mb-3">
-        <div class="d-flex justify-content-between"><div>Invoice</div><div>${{ '%.2f'|format(invoice.total) }}</div></div>
+        <div class="d-flex justify-content-between"><div>Subtotal</div><div>${{ '%.2f'|format(invoice.subtotal or invoice.total) }}</div></div>
+        <div class="d-flex justify-content-between"><div>Discount</div><div>−${{ '%.2f'|format(invoice.discount or 0) }}</div></div>
+        <div class="d-flex justify-content-between"><div>Tax / GST</div><div>${{ '%.2f'|format(invoice.tax or 0) }}</div></div>
+        <div class="d-flex justify-content-between fw-bold"><div>Total</div><div>${{ '%.2f'|format(invoice.total) }}</div></div>
         <div class="d-flex justify-content-between"><div>Paid</div><div>${{ '%.2f'|format(paid) }}</div></div>
         <div class="d-flex justify-content-between"><div>Outstanding</div><div>${{ '%.2f'|format(outstanding) }}</div></div>
       </div>

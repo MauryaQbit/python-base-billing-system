@@ -1,52 +1,105 @@
 {% extends "layout.html" %}
 {% block hero %}
   <div class="hero hero-home bg-white shadow-sm mb-4">
-    <div class="container-fluid px-4 px-lg-5 py-4 d-flex justify-content-between align-items-center">
-      <div>
-        <h1 class="display-6 fw-bold mb-1">Welcome to MyShop</h1>
-        <p class="text-muted mb-0">Simple billing with beautiful UI and PDF invoices</p>
+    <div class="container-fluid px-4 px-lg-5 py-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-1">Welcome to MyShop ✨</h1>
+          <p class="text-muted mb-0">Real catalog • Live stock • GST + discount • PDF invoices</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/cart" class="btn btn-primary btn-lg"><i class="bi bi-cart3 me-1"></i>View Cart <span class="badge bg-white text-primary ms-1">{{ cart_count or 0 }}</span></a>
+          <a href="/invoices" class="btn btn-outline-secondary btn-lg"><i class="bi bi-receipt me-1"></i>Invoices</a>
+        </div>
       </div>
-      <div>
-        <a href="/cart" class="btn btn-outline-primary btn-lg">View Cart <span class="badge bg-primary text-white">{{ cart_count or 0 }}</span></a>
+      <div class="row g-3 mt-3">
+        <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value">${{ '%.2f'|format(stats.revenue) }}</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">Invoices</div><div class="stat-value">{{ stats.invoices }}</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">Products</div><div class="stat-value">{{ stats.products }}</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat-card {{ 'stat-warn' if stats.low_stock else '' }}"><div class="stat-label">Low stock (&lt;10)</div><div class="stat-value">{{ stats.low_stock }}</div></div></div>
       </div>
+      <form class="row g-2 mt-3" method="get" action="/">
+        <div class="col-md-6"><input name="q" value="{{ search_q }}" class="form-control form-control-lg" placeholder="🔍 Search notebook, headphones, SKU..."></div>
+        <div class="col-md-4">
+          <select name="cat" class="form-select form-select-lg" onchange="this.form.submit()">
+            <option value="">All categories</option>
+            {% for c in categories %}
+            <option value="{{ c }}" {{ 'selected' if c == active_cat else '' }}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 d-grid"><button class="btn btn-dark btn-lg">Search</button></div>
+      </form>
     </div>
   </div>
 {% endblock %}
 {% block content %}
+  {% if active_cat or search_q %}
+  <div class="mb-3 d-flex gap-2 align-items-center">
+    <span class="text-muted">Filters:</span>
+    {% if search_q %}<span class="badge bg-dark">“{{ search_q }}”</span>{% endif %}
+    {% if active_cat %}<span class="badge bg-primary">{{ active_cat }}</span>{% endif %}
+    <a href="/" class="btn btn-sm btn-link">Clear</a>
+    <span class="text-muted small ms-auto">{{ products|length }} result(s)</span>
+  </div>
+  {% endif %}
   <div class="row g-4">
     <div class="col-lg-9">
-      <div class="screenshot-spacer"></div>
       <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for p in products %}
         <div class="col">
           <div class="card h-100 product-card shadow-sm">
-            {% if p.image_url %}
-              <img src="{{ p.image_url }}" class="card-img-top product-img" alt="{{ p.name }}">
-            {% else %}
-              <div class="placeholder-img">No Image</div>
-            {% endif %}
+            <div class="product-img-wrap">
+              {% if p.image_url %}
+                <img src="{{ p.image_url }}" loading="lazy" class="card-img-top product-img" alt="{{ p.name }}" onerror="this.onerror=null;this.src='https://picsum.photos/seed/myshop{{ p.id }}/600/400'">
+              {% else %}
+                <img src="https://picsum.photos/seed/myshop{{ p.id }}/600/400" loading="lazy" class="card-img-top product-img" alt="{{ p.name }}">
+              {% endif %}
+              <span class="badge bg-white text-dark category-badge">{{ p.category or 'General' }}</span>
+              {% if (p.stock or 0) < 10 %}
+                <span class="badge bg-danger stock-badge">Only {{ p.stock }} left</span>
+              {% endif %}
+            </div>
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ p.name }}</h5>
-              <p class="card-text text-muted mb-2">{{ p.description if p.description else '' }}</p>
-              <div class="mt-auto d-flex justify-content-between align-items-center">
-                <div class="price">${{ '%.2f'|format(p.price) }}</div>
-                <form action="/cart/add/{{ p.id }}" method="post">
-                  <button class="btn btn-sm btn-primary">Add to cart</button>
-                </form>
+              <div class="small text-muted">{{ p.sku or '' }}</div>
+              <h5 class="card-title mb-1"><a href="/product/{{ p.id }}" class="product-link">{{ p.name }}</a></h5>
+              <p class="card-text text-muted small product-desc">{{ p.description or '' }}</p>
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="price">${{ '%.2f'|format(p.price) }}</div>
+                  <div class="small {{ 'text-danger fw-bold' if (p.stock or 0) < 10 else 'text-muted' }}"><i class="bi bi-box me-1"></i>{{ p.stock }} in stock</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <form action="/cart/add/{{ p.id }}" method="post" class="flex-fill d-grid">
+                    <button class="btn btn-primary" {{ 'disabled' if (p.stock or 0) <= 0 else '' }}><i class="bi bi-cart-plus me-1"></i>{{ 'Out of stock' if (p.stock or 0) <= 0 else 'Add to cart' }}</button>
+                  </form>
+                  <a href="/product/{{ p.id }}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i></a>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        {% else %}
+        <div class="col-12"><div class="alert alert-light">No products found. <a href="/">Clear filters</a></div></div>
         {% endfor %}
       </div>
     </div>
     <div class="col-lg-3">
       <div class="card shadow-sm sticky-sidebar p-3">
         <div class="card-body">
-          <h5 class="card-title">Cart</h5>
+          <h5 class="card-title"><i class="bi bi-cart3 me-1"></i>Cart</h5>
           <p class="card-text">Items: <strong>{{ cart_count or 0 }}</strong></p>
-          <a href="/cart" class="btn btn-outline-primary w-100">View Cart</a>
-          <a href="/admin/products" class="btn btn-link mt-2">Admin - Products</a>
+          <p class="small text-muted">GST {{ tax_default }}% applied at cart. Discount available at checkout.</p>
+          <a href="/cart" class="btn btn-primary w-100">View Cart</a>
+          <a href="/admin/products" class="btn btn-link mt-2 w-100">Admin — Products</a>
+          <hr>
+          <h6 class="small text-muted text-uppercase">Categories</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="/" class="badge {{ 'bg-dark' if not active_cat else 'bg-light text-dark' }} text-decoration-none p-2">All</a>
+            {% for c in categories %}
+            <a href="/?cat={{ c }}" class="badge {{ 'bg-primary' if c == active_cat else 'bg-light text-dark' }} text-decoration-none p-2">{{ c }}</a>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>

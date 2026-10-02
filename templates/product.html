@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card shadow-sm overflow-hidden">
+      {% if product.image_url %}
+      <img src="{{ product.image_url }}" class="detail-img" alt="{{ product.name }}" onerror="this.onerror=null;this.src='https://picsum.photos/seed/myshop{{ product.id }}/900/600'">
+      {% else %}
+      <img src="https://picsum.photos/seed/myshop{{ product.id }}/900/600" class="detail-img" alt="{{ product.name }}">
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <span class="badge bg-light text-dark mb-2">{{ product.category or 'General' }}</span>
+    <h1 class="fw-bold">{{ product.name }}</h1>
+    <div class="text-muted small mb-2">SKU: {{ product.sku or ('PRD-' ~ product.id) }} • {{ product.stock }} in stock</div>
+    <div class="display-6 fw-bold text-primary mb-3">${{ '%.2f'|format(product.price) }}</div>
+    <p class="text-muted">{{ product.description or 'No description yet.' }}</p>
+    <div class="d-flex gap-2 mt-4">
+      <form action="/cart/add/{{ product.id }}" method="post" class="d-grid flex-fill">
+        <button class="btn btn-primary btn-lg" {{ 'disabled' if (product.stock or 0) <= 0 else '' }}><i class="bi bi-cart-plus me-1"></i>Add to cart</button>
+      </form>
+      <a href="/" class="btn btn-outline-secondary btn-lg">Back</a>
+    </div>
+    <div class="alert alert-light mt-4 small"><i class="bi bi-truck me-1"></i>Free delivery over $50 • GST invoice included • 7-day returns</div>
+  </div>
+</div>
+{% endblock %}

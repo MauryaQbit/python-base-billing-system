@@ -1,26 +1,60 @@
 {% extends "layout.html" %}
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center">
-    <h3>Invoice #{{ invoice.id }}</h3>
-    <h5>{{ invoice.customer }}</h5>
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+      <h3 class="fw-bold mb-0">Invoice #{{ invoice.id }}
+        {% if status == 'Paid' %}<span class="badge bg-success ms-2">Paid</span>
+        {% elif status == 'Partially Paid' %}<span class="badge bg-warning text-dark ms-2">Partially Paid</span>
+        {% else %}<span class="badge bg-danger ms-2">Unpaid</span>{% endif %}
+      </h3>
+      <div class="text-muted">{{ invoice.customer }} • {{ invoice.created }}</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/order/{{ invoice.id }}" class="btn btn-outline-secondary"><i class="bi bi-box-seam me-1"></i>Order view</a>
+      <a href="/invoice/{{ invoice.id }}/pdf" class="btn btn-primary"><i class="bi bi-file-pdf me-1"></i>Download PDF</a>
+      <a href="/invoices" class="btn btn-light">Back</a>
+    </div>
   </div>
-  <p>Created: {{ invoice.created }}</p>
-  <table class="table">
-    <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
-    <tbody>
-      {% for it in items %}
-      <tr>
-        <td>{{ it.name }}</td>
-        <td>{{ it.quantity }}</td>
-        <td>${{ '%.2f'|format(it.price) }}</td>
-        <td>${{ '%.2f'|format(it.price * it.quantity) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <h4>Total: ${{ '%.2f'|format(invoice.total) }}</h4>
-  <div class="d-flex gap-2">
-    <a href="/invoices" class="btn btn-outline-secondary">Back</a>
-    <a href="/invoice/{{ invoice.id }}/pdf" class="btn btn-primary">Download PDF</a>
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th class="text-end">Subtotal</th></tr></thead>
+          <tbody>
+            {% for it in items %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  {% if it.image_url %}<img src="{{ it.image_url }}" class="cart-thumb" onerror="this.onerror=null;this.src='https://picsum.photos/seed/myshop{{ it.product_id }}/200/200'">{% endif %}
+                  <div><div class="fw-bold">{{ it.name }}</div><div class="small text-muted">{{ it.sku or '' }}</div></div>
+                </div>
+              </td>
+              <td>{{ it.quantity }}</td>
+              <td>${{ '%.2f'|format(it.price) }}</td>
+              <td class="text-end">${{ '%.2f'|format(it.price * it.quantity) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm p-3">
+        <h5>Summary</h5>
+        <div class="d-flex justify-content-between"><span>Subtotal</span><span>${{ '%.2f'|format(invoice.subtotal or invoice.total) }}</span></div>
+        <div class="d-flex justify-content-between"><span>Discount</span><span>−${{ '%.2f'|format(invoice.discount or 0) }}</span></div>
+        <div class="d-flex justify-content-between"><span>Tax / GST</span><span>${{ '%.2f'|format(invoice.tax or 0) }}</span></div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span class="text-primary">${{ '%.2f'|format(invoice.total) }}</span></div>
+        <div class="d-flex justify-content-between mt-2"><span>Paid</span><span class="text-success">${{ '%.2f'|format(paid) }}</span></div>
+        <div class="d-flex justify-content-between fw-bold"><span>Due</span><span class="{{ 'text-danger' if outstanding > 0 else 'text-success' }}">${{ '%.2f'|format(outstanding) }}</span></div>
+        {% if payments %}
+        <hr><h6 class="small text-muted">Payments ({{ payments|length }})</h6>
+        {% for p in payments %}<div class="small d-flex justify-content-between"><span>#{{ p.id }} • {{ p.method }}</span><span class="text-success">+${{ '%.2f'|format(p.amount) }}</span></div>{% endfor %}
+        {% endif %}
+      </div>
+    </div>
   </div>
 {% endblock %}

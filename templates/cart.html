@@ -1,29 +1,74 @@
 {% extends "layout.html" %}
 {% block content %}
-  <h3>Your Cart</h3>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold mb-0"><i class="bi bi-cart3 me-2"></i>Your Cart</h3>
+    {% if items %}<a href="/cart/clear" class="btn btn-sm btn-outline-danger">Clear cart</a>{% endif %}
+  </div>
   {% if items %}
-    <table class="table">
-      <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead>
-      <tbody>
-        {% for it in items %}
-        <tr>
-          <td>{{ it.product.name }}</td>
-          <td>{{ it.qty }}</td>
-          <td>${{ '%.2f'|format(it.product.price) }}</td>
-          <td>${{ '%.2f'|format(it.subtotal) }}</td>
-          <td><a href="/cart/remove/{{ it.product.id }}" class="btn btn-sm btn-link">Remove</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="d-flex justify-content-between align-items-center">
-      <h4>Total: ${{ '%.2f'|format(total) }}</h4>
-      <form action="/checkout" method="post" class="d-flex gap-2">
-        <input name="customer" class="form-control" placeholder="Customer name" required>
-        <button class="btn btn-success">Checkout</button>
-      </form>
+    <div class="card shadow-sm mb-3">
+      <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead><tr><th>Product</th><th>Price</th><th style="width:170px">Qty</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody>
+          {% for it in items %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                {% if it.product.image_url %}
+                <img src="{{ it.product.image_url }}" class="cart-thumb" alt="{{ it.product.name }}" onerror="this.onerror=null;this.src='https://picsum.photos/seed/myshop{{ it.product.id }}/200/200'">
+                {% else %}
+                <img src="https://picsum.photos/seed/myshop{{ it.product.id }}/200/200" class="cart-thumb" alt="">
+                {% endif %}
+                <div><div class="fw-bold">{{ it.product.name }}</div><div class="small text-muted">{{ it.product.sku or '' }} • {{ it.product.stock }} in stock</div></div>
+              </div>
+            </td>
+            <td>${{ '%.2f'|format(it.product.price) }}</td>
+            <td>
+              <form action="/cart/update/{{ it.product.id }}" method="post" class="d-flex gap-1">
+                <input type="number" name="qty" value="{{ it.qty }}" min="0" max="{{ it.product.stock }}" class="form-control form-control-sm" style="width:70px">
+                <button class="btn btn-sm btn-outline-primary">Update</button>
+              </form>
+            </td>
+            <td class="fw-bold">${{ '%.2f'|format(it.subtotal) }}</td>
+            <td><a href="/cart/remove/{{ it.product.id }}" class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card shadow-sm p-3">
+          <h5>Checkout</h5>
+          <form action="/checkout" method="post">
+            <div class="mb-2"><label class="small text-muted">Customer name</label><input name="customer" class="form-control" placeholder="Walk-in customer" required></div>
+            <div class="row g-2">
+              <div class="col-6"><label class="small text-muted">Discount ($)</label><input name="discount" type="number" step="0.01" min="0" value="0" class="form-control"></div>
+              <div class="col-6"><label class="small text-muted">Tax / GST (%)</label><input name="tax_rate" type="number" step="0.01" min="0" value="{{ tax_rate }}" class="form-control"></div>
+            </div>
+            <button class="btn btn-success btn-lg w-100 mt-3"><i class="bi bi-check-circle me-1"></i>Checkout • ${{ '%.2f'|format(total) }}</button>
+          </form>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card shadow-sm p-3">
+          <h5>Bill summary</h5>
+          <div class="d-flex justify-content-between"><span>Subtotal</span><span>${{ '%.2f'|format(subtotal) }}</span></div>
+          <div class="d-flex justify-content-between"><span>GST ({{ tax_rate }}%)</span><span>${{ '%.2f'|format(tax_amt) }}</span></div>
+          <hr>
+          <div class="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span class="text-primary">${{ '%.2f'|format(total) }}</span></div>
+          <div class="small text-muted mt-2">Discount can be added at checkout. Stock is decremented on purchase.</div>
+          <a href="/" class="btn btn-link btn-sm mt-2">← Continue shopping</a>
+        </div>
+      </div>
     </div>
   {% else %}
-    <p>Your cart is empty. <a href="/">Browse products</a></p>
+    <div class="text-center py-5">
+      <div class="display-1">🛒</div>
+      <h4>Your cart is empty</h4>
+      <p class="text-muted">Add some real products to get started.</p>
+      <a href="/" class="btn btn-primary">Browse products</a>
+    </div>
   {% endif %}
 {% endblock %}

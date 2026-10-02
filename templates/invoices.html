@@ -1,22 +1,41 @@
 {% extends "layout.html" %}
 {% block content %}
-  <h3>Invoices</h3>
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h3 class="fw-bold mb-0">Invoices</h3>
+    <div class="d-flex gap-2">
+      <a href="/invoices" class="btn btn-sm {{ 'btn-dark' if not active_status else 'btn-outline-secondary' }}">All</a>
+      <a href="/invoices?status=Paid" class="btn btn-sm {{ 'btn-success' if active_status=='Paid' else 'btn-outline-success' }}">Paid</a>
+      <a href="/invoices?status=Partially Paid" class="btn btn-sm {{ 'btn-warning' if active_status=='Partially Paid' else 'btn-outline-warning' }}">Partial</a>
+      <a href="/invoices?status=Unpaid" class="btn btn-sm {{ 'btn-danger' if active_status=='Unpaid' else 'btn-outline-danger' }}">Unpaid</a>
+    </div>
+  </div>
   {% if invoices %}
-    <table class="table">
-      <thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Created</th><th></th></tr></thead>
-      <tbody>
-        {% for inv in invoices %}
-          <tr>
-            <td>{{ inv.id }}</td>
-            <td>{{ inv.customer }}</td>
-            <td>${{ '%.2f'|format(inv.total) }}</td>
-            <td>{{ inv.created }}</td>
-            <td><a href="/invoice/{{ inv.id }}" class="btn btn-sm btn-primary">View</a></td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+          {% for inv in invoices %}
+            <tr>
+              <td class="fw-bold">#{{ inv.id }}</td>
+              <td>{{ inv.customer }}</td>
+              <td>${{ '%.2f'|format(inv.total) }}</td>
+              <td class="text-success">${{ '%.2f'|format(inv.paid) }}</td>
+              <td class="fw-bold {{ 'text-danger' if inv.outstanding > 0 else 'text-muted' }}">${{ '%.2f'|format(inv.outstanding) }}</td>
+              <td>
+                {% if inv.derived_status == 'Paid' %}<span class="badge bg-success">Paid</span>
+                {% elif inv.derived_status == 'Partially Paid' %}<span class="badge bg-warning text-dark">Partial</span>
+                {% else %}<span class="badge bg-danger">Unpaid</span>{% endif %}
+              </td>
+              <td class="small text-muted">{{ inv.created }}</td>
+              <td class="text-end"><a href="/invoice/{{ inv.id }}" class="btn btn-sm btn-primary">View</a> <a href="/order/{{ inv.id }}" class="btn btn-sm btn-outline-secondary">Order</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
   {% else %}
-    <p>No invoices yet.</p>
+    <div class="alert alert-light">No invoices yet. <a href="/">Create your first sale</a></div>
   {% endif %}
 {% endblock %}

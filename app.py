@@ -1,4 +1,5 @@
 import os
+import secrets
 import sqlite3
 import smtplib
 from email.message import EmailMessage
@@ -15,8 +16,34 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "billing.db"
 
+SECRET_KEY_FILE = BASE_DIR / ".secret_key"
+
+
+def load_secret_key():
+    """Env var wins; otherwise reuse a generated key so sessions survive restarts."""
+    env_key = os.environ.get("SECRET_KEY")
+    if env_key:
+        return env_key
+    if SECRET_KEY_FILE.exists():
+        return SECRET_KEY_FILE.read_text().strip()
+    key = secrets.token_hex(32)
+    SECRET_KEY_FILE.write_text(key)
+    try:
+        os.chmod(SECRET_KEY_FILE, 0o600)
+    except OSError:
+        pass
+    return key
+
+
 app = Flask(__name__)
-app.secret_key = "replace-with-a-secure-random-key"
+app.secret_key = load_secret_key()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "").lower() in ("1", "true", "yes"),
+    MAX_CONTENT_LENGTH=16 * 1024 * 1024,
+)
+DEBUG = os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes")
 UPLOAD_FOLDER = BASE_DIR / "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXT = {'.png', '.jpg', '.jpeg', '.pdf', '.txt', '.csv'}
@@ -528,8 +555,16 @@ def admin_products():
     return render_template('admin_products.html', products=rows)
 
 
+@app.after_request
+def set_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    return response
+
+
 if __name__ == "__main__":
     if not DB_PATH.exists():
         with app.app_context():
             init_db()
-    app.run(debug=True)
+    app.run(debug=DEBUG, use_reloader=DEBUG)

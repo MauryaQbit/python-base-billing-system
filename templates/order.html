@@ -6,12 +6,12 @@
       <a class="btn btn-light btn-sm order-back" href="#"><i class="bi bi-arrow-left"></i></a>
       <div class="order-title-block">
         <h2 class="mb-1 order-title">Order #{{ invoice.id }} <span class="badge {{ 'bg-success' if status=='Paid' else 'bg-warning text-dark' if status=='Partially Paid' else 'bg-danger' }} ms-2" style="font-size:1rem">{{ status }}</span></h2>
-        <div class="text-muted order-meta">Ordered • Via Website • {{ items|length }} Product(s)</div>
+        <div class="text-muted order-meta">{{ items|length }} Product(s) • Invoice #{{ invoice.id }}</div>
       </div>
       <div class="ms-auto d-flex gap-2 order-actions">
         <a href="/invoice/{{ invoice.id }}/pdf" class="btn btn-outline-secondary btn-sm"><i class="bi bi-cloud-arrow-down"></i> Export</a>
         <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="bi bi-printer"></i> Print</button>
-        <button class="btn btn-dark btn-sm">Confirm Return</button>
+        <a href="/invoice/{{ invoice.id }}" class="btn btn-dark btn-sm"><i class="bi bi-receipt"></i> Invoice</a>
         <div class="dropdown">
           <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">&nbsp;</button>
           <ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item">More</a></li></ul>
@@ -41,7 +41,7 @@
                   <div class="line"></div>
                   <div class="step"><i class="bi bi-clock text-white"></i></div>
                 </div>
-                <div class="small text-muted mt-1">Picked up: 30 Oct, 9:00am</div>
+                <div class="small text-muted mt-1">Created: {{ invoice.created }}</div>
               </div>
               <div class="text-end actions d-flex gap-2 flex-wrap justify-content-end">
                 <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#attachments"><i class="bi bi-paperclip"></i> Attachments</button>
@@ -118,7 +118,7 @@
                   </div>
                 </td>
                 <td>{{ it.quantity }}x</td>
-                <td>2 day(s) • ${{ '%.2f'|format(it.price) }}/day</td>
+                <td>${{ '%.2f'|format(it.price) }} each</td>
                 <td class="text-end fw-bold">${{ '%.2f'|format(it.quantity * it.price) }}</td>
               </tr>
               {% endfor %}
@@ -133,7 +133,7 @@
     <div class="card mb-3 sticky-sidebar p-3 payments-card shadow-sm" id="payments-panel">
       <div class="d-flex align-items-center justify-content-between mb-2">
         <div class="payments-title">Payments</div>
-        <div class="notes-tab">Notes</div>
+        <div class="notes-tab">Status</div>
       </div>
       <div class="d-flex justify-content-between align-items-start">
         <div>

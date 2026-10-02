@@ -5,7 +5,8 @@ import smtplib
 from email.message import EmailMessage
 from flask import Flask, g, render_template, request, redirect, url_for, session, flash, send_file, send_from_directory
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
+from urllib.parse import urlparse
 import io
 from werkzeug.utils import secure_filename
 from reportlab.lib.pagesizes import A4
@@ -216,6 +217,16 @@ def cart_view():
                            tax_rate=tax_rate, tax_amt=tax_amt, total=total)
 
 
+def _safe_back(default_endpoint="index"):
+    """Redirect back to the referring page, but only on our own host (open-redirect guard)."""
+    target = request.referrer
+    if target:
+        ref = urlparse(target)
+        if ref.scheme in ("http", "https") and ref.netloc == request.host and ref.path.startswith("/"):
+            return ref.path + (f"?{ref.query}" if ref.query else "")
+    return url_for(default_endpoint)
+
+
 @app.route("/cart/add/<int:product_id>", methods=["POST"])
 def add_to_cart(product_id):
     db = get_db()
@@ -225,11 +236,11 @@ def add_to_cart(product_id):
     cur_qty = cart.get(key, 0)
     if row is not None and row["stock"] is not None and cur_qty + 1 > row["stock"]:
         flash(f"Only {row['stock']} in stock")
-        return redirect(url_for("index"))
+        return redirect(_safe_back())
     cart[key] = cur_qty + 1
     session["cart"] = cart
     flash("Added to cart")
-    return redirect(request.referrer or url_for("index"))
+    return redirect(_safe_back())
 
 
 @app.route("/cart/update/<int:product_id>", methods=["POST"])
@@ -253,7 +264,7 @@ def update_cart(product_id):
     return redirect(url_for("cart_view"))
 
 
-@app.route("/cart/remove/<int:product_id>")
+@app.route("/cart/remove/<int:product_id>", methods=["POST"])
 def remove_from_cart(product_id):
     cart = session.get("cart", {})
     key = str(product_id)
@@ -263,9 +274,10 @@ def remove_from_cart(product_id):
     return redirect(url_for("cart_view"))
 
 
-@app.route("/cart/clear")
+@app.route("/cart/clear", methods=["POST"])
 def clear_cart():
     session["cart"] = {}
+    flash("Cart cleared")
     return redirect(url_for("cart_view"))
 
 
@@ -301,7 +313,7 @@ def checkout():
     total = round(taxable + tax_amt, 2)
     cur = db.execute(
         "INSERT INTO invoices (customer, subtotal, discount, tax, total, status, created) VALUES (?,?,?,?,?,?,?)",
-        (customer, round(subtotal, 2), round(discount, 2), tax_amt, total, "Unpaid", datetime.utcnow()))
+        (customer, round(subtotal, 2), round(discount, 2), tax_amt, total, "Unpaid", datetime.now(timezone.utc)))
     invoice_id = cur.lastrowid
     for r in rows:
         pid = r["id"]
@@ -392,7 +404,7 @@ def upload_attachment(invoice_id):
     os.makedirs(inv_dir, exist_ok=True)
     filepath = inv_dir / filename
     f.save(filepath)
-    db.execute('INSERT INTO attachments (invoice_id, filename, filepath, uploaded_at) VALUES (?,?,?,?)', (invoice_id, filename, str(filepath), datetime.utcnow()))
+    db.execute('INSERT INTO attachments (invoice_id, filename, filepath, uploaded_at) VALUES (?,?,?,?)', (invoice_id, filename, str(filepath), datetime.now(timezone.utc)))
     db.commit()
     flash('Attachment uploaded')
     return redirect(url_for('order_view', invoice_id=invoice_id))
@@ -470,7 +482,7 @@ def record_payment(invoice_id):
     method = request.form.get('method') or 'Manual'
     note = request.form.get('note') or ''
     db.execute('INSERT INTO payments (invoice_id, amount, method, note, created) VALUES (?,?,?,?,?)',
-               (invoice_id, amount, method, note, datetime.utcnow()))
+               (invoice_id, amount, method, note, datetime.now(timezone.utc)))
     inv = db.execute("SELECT total FROM invoices WHERE id = ?", (invoice_id,)).fetchone()
     paid = db.execute("SELECT COALESCE(SUM(amount),0) FROM payments WHERE invoice_id = ?", (invoice_id,)).fetchone()[0] or 0
     if inv:

@@ -240,10 +240,25 @@ body { background: #f1f5f9; font-family: Inter, system-ui, -apple-system, Segoe 
 	.card-body { padding: 1rem; }
 }
 
+@media (max-width: 991.98px) {
+	.table > :not(caption) > * > * { padding: .7rem .6rem; }
+	.table thead th, .table tbody td { font-size: .9rem; }
+}
+
 @media (max-width: 575.98px) {
-	.product-img { height: 150px; }
-	.stat-label { font-size: .68rem; }
-	.stat-value { font-size: 1.05rem; }
-	.mobile-tabbar a span { font-size: .66rem; }
+	.product-img { height: 130px; }
+	.product-desc { display: none; }
+	.stat-label { font-size: .66rem; }
+	.stat-value { font-size: 1rem; }
+	.card-body { padding: .8rem; }
+	.cart-thumb { width: 40px; height: 40px; }
+	.detail-img { height: 190px; }
+	.mobile-tabbar a span { font-size: .64rem; }
 	.app-main { padding-bottom: 88px; }
+	.btn { font-size: .92rem; }
+}
+
+@media (max-width: 400px) {
+	.product-img { height: 110px; }
+	.product-card .card-body .small.text-muted { display: none; }
 }

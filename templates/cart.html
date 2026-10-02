@@ -20,8 +20,7 @@
                 <img src="https://picsum.photos/seed/myshop{{ it.product.id }}/200/200" class="cart-thumb" alt="">
                 {% endif %}
                 <div><div class="fw-bold">{{ it.product.name }}</div><div class="small text-muted">{{ it.product.sku or '' }} • {{ it.product.stock }} in stock</div></div>
-              </div>
-            </td>
+              </div>            </td>
             <td>${{ '%.2f'|format(it.product.price) }}</td>
             <td>
               <form action="/cart/update/{{ it.product.id }}" method="post" class="d-flex gap-1">

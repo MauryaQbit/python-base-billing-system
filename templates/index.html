@@ -19,8 +19,8 @@
         <div class="col-6 col-md-3"><div class="stat-card {{ 'stat-warn' if stats.low_stock else '' }}"><div class="stat-label">Low stock (&lt;10)</div><div class="stat-value">{{ stats.low_stock }}</div></div></div>
       </div>
       <form class="row g-2 mt-3" method="get" action="/">
-        <div class="col-md-6"><input name="q" value="{{ search_q }}" class="form-control form-control-lg" placeholder="🔍 Search notebook, headphones, SKU..."></div>
-        <div class="col-md-4">
+        <div class="col-12 col-md-6 col-xl-5"><input name="q" value="{{ search_q }}" class="form-control form-control-lg" placeholder="🔍 Search notebook, headphones, SKU..."></div>
+        <div class="col-8 col-md-4 col-xl-3">
           <select name="cat" class="form-select form-select-lg" onchange="this.form.submit()">
             <option value="">All categories</option>
             {% for c in categories %}
@@ -28,7 +28,7 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2 d-grid"><button class="btn btn-dark btn-lg">Search</button></div>
+        <div class="col-4 col-md-2 col-xl-2 d-grid"><button class="btn btn-dark btn-lg">Search</button></div>
       </form>
     </div>
   </div>
@@ -45,7 +45,7 @@
   {% endif %}
   <div class="row g-4">
     <div class="col-lg-9">
-      <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div class="row row-cols-2 row-cols-lg-3 g-3 g-md-4">
         {% for p in products %}
         <div class="col">
           <div class="card h-100 product-card shadow-sm">

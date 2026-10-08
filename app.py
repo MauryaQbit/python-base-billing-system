@@ -3,7 +3,7 @@ import secrets
 import sqlite3
 import smtplib
 from email.message import EmailMessage
-from flask import Flask, g, render_template, request, redirect, url_for, session, flash, send_file, send_from_directory
+from flask import Flask, g, render_template, request, redirect, url_for, session, flash, send_file, send_from_directory, jsonify
 from pathlib import Path
 from datetime import datetime, timezone
 from urllib.parse import urlparse
@@ -164,6 +164,17 @@ def _invoice_status(inv_total, paid):
     if paid >= (inv_total or 0) - 0.01:
         return "Paid"
     return "Partially Paid"
+
+
+@app.route("/healthz")
+def healthz():
+    db = get_db()
+    try:
+        products = db.execute("SELECT COUNT(*) FROM products").fetchone()[0] or 0
+        invoices = db.execute("SELECT COUNT(*) FROM invoices").fetchone()[0] or 0
+    except Exception:
+        products, invoices = 0, 0
+    return jsonify(status="ok", products=products, invoices=invoices)
 
 
 @app.route("/")

@@ -4,6 +4,8 @@ __pycache__/
 *.log
 *.db
 uploads/
+static/product_images/*
+!static/product_images/.gitkeep
 venv/
 .env
 .secret_key

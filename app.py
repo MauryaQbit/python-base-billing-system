@@ -48,6 +48,9 @@ DEBUG = os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes")
 UPLOAD_FOLDER = BASE_DIR / "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXT = {'.png', '.jpg', '.jpeg', '.pdf', '.txt', '.csv'}
+PRODUCT_IMG_FOLDER = BASE_DIR / "static" / "product_images"
+os.makedirs(PRODUCT_IMG_FOLDER, exist_ok=True)
+ALLOWED_IMG_EXT = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
 
 TAX_DEFAULT = 18.0
 
@@ -558,6 +561,16 @@ def admin_products():
             stock = 50
         sku = request.form.get('sku') or ''
         image_url = request.form.get('image_url') or None
+        img_file = request.files.get('image_file')
+        if img_file and img_file.filename:
+            filename = secure_filename(img_file.filename)
+            ext = Path(filename).suffix.lower()
+            if ext not in ALLOWED_IMG_EXT:
+                flash('Image type not allowed (png/jpg/jpeg/webp/gif)')
+                return redirect(url_for('admin_products'))
+            filename = f"{secrets.token_hex(8)}{ext}"
+            img_file.save(PRODUCT_IMG_FOLDER / filename)
+            image_url = f"/static/product_images/{filename}"
         db.execute('INSERT INTO products (name, description, category, price, stock, sku, image_url) VALUES (?,?,?,?,?,?,?)',
                    (name, description, category, price, stock, sku, image_url))
         db.commit()

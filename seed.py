@@ -25,12 +25,12 @@ PRODUCTS = [
      U.format("photo-1602143407151-7111542de6e8")),
     ("Ceramic Coffee Mug", "350ml ceramic mug, dishwasher & microwave safe.", "Office", 9.99, 200, "OFC-002",
      U.format("photo-1514228742587-6b1558fcca3d")),
-    ("Heavy-Duty Stapler", "50-sheet stapler with ergonomic grip.", "Stationery", 14.25, 70, "STN-003",
-     U.format("photo-1580894894513-541e068a3e2b")),
-    ("USB-C Hub 7-in-1", "HDMI, 2x USB-A, USB-C PD, SD/microSD hub.", "Electronics", 45.99, 40, "ELC-004",
-     U.format("photo-1618410320928-25228d811631")),
-    ("A4 Paper Pack", "500 sheets premium 80gsm A4 paper.", "Stationery", 8.50, 300, "STN-004",
-     U.format("photo-1568205612837-017257d2310a")),
+     ("Heavy-Duty Stapler", "50-sheet stapler with ergonomic grip.", "Stationery", 14.25, 70, "STN-003",
+      U.format("photo-1562966700-49bb28f1c62d")),
+     ("USB-C Hub 7-in-1", "HDMI, 2x USB-A, USB-C PD, SD/microSD hub.", "Electronics", 45.99, 40, "ELC-004",
+      U.format("photo-1760376789487-994070337c76")),
+     ("A4 Paper Pack", "500 sheets premium 80gsm A4 paper.", "Stationery", 8.50, 300, "STN-004",
+      U.format("photo-1586075010923-2dd4570fb338")),
 ]
 
 

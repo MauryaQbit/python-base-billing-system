@@ -58,6 +58,7 @@ body { background: #f1f5f9; font-family: Inter, system-ui, -apple-system, Segoe 
 
 .app-main {
 	margin-left: 92px;
+	width: calc(100% - 92px);
 	padding-top: 76px;
 }
 

@@ -1,6 +1,17 @@
 # python-base-billing-system
 This is a minimal Python-based billing system with a simple, attractive web UI built with Flask and Bootstrap.
 
+## Screenshots
+
+### 1. Shop / Home page (`/`)
+![Shop home page](screenshots/home.png)
+
+### 2. Shopping Cart (`/cart`)
+![Shopping cart](screenshots/cart.png)
+
+### 3. Invoice view (`/invoice/<id>`)
+![Invoice view](screenshots/invoice.png)
+
 Quick start
 1. Create a virtual environment and install dependencies:
 
